@@ -15,6 +15,7 @@ Plugin 'tpope/vim-pathogen'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 Plugin 'altercation/vim-colors-solarized'
+Plugin 'edkolev/tmuxline.vim'
 " Plugin 'chriskempson/base16-vim'
 " Plugin 'flazz/vim-colorschemes'
 
@@ -24,6 +25,8 @@ Plugin 'scrooloose/nerdtree'
 Plugin 'jistr/vim-nerdtree-tabs'
 Plugin 'tomtom/tcomment_vim'
 Plugin 'vim-scripts/vim-auto-save'
+Plugin 'Townk/vim-autoclose'
+Plugin 'maralla/validator.vim'
 " Plugin 'gregsexton/MatchTag'
 " Plugin 'Valloric/YouCompleteMe'
 " Plugin 'vim-scripts/taglist.vim'
@@ -33,7 +36,6 @@ Plugin 'vim-scripts/vim-auto-save'
 Plugin 'octol/vim-cpp-enhanced-highlight'
 Plugin 'Mizuchi/STL-Syntax'
 Plugin 'Shougo/neocomplete.vim'
-Plugin 'scrooloose/syntastic'
 " Plugin 'xolox/vim-misc'
 " Plugin 'vim-scripts/a.vim'
 " Plugin 'majutsushi/tagbar'
@@ -72,15 +74,21 @@ nmap <leader>w :w!<CR>
 " Fast quit
 nmap <leader>q :qall!<CR>
 
-set mouse=a
+set pastetoggle=<leader>pa
 
 " Very important
 set nobackup
 set nowb
 set noswapfile
 
+set ruler
+
 " Change the file when it's changed from the outside
 set autoread
+
+" Disable folding
+set nofoldenable
+set fdm=indent
 
 " Set wildmode
 set wildmode=longest:full,full
@@ -96,12 +104,15 @@ set ruler
 
 " Set how much VIM has to remember
 set history=5048
+set undofile
+set undodir=~/.vim/undodir
 
 " Visual mode pressing * or # searches for the current selection
 vnoremap <silent> * :call VisualSelection('f')<CR>
 vnoremap <silent> # :call VisualSelection('b')<CR>
 
 nnoremap <leader>ev :vsplit $MYVIMRC<cr>
+
 " ====================================================
 " VIM user interface =================================
 " ====================================================
@@ -128,6 +139,11 @@ set incsearch
 " Don't redraw while executing macros (good performance config)
 set lazyredraw
 
+" Cursorline
+" set cursorline
+set colorcolumn=110
+highlight ColorColumn ctermbg=darkgrey
+
 " Turn on magic for regular expressions
 set magic
 
@@ -148,6 +164,7 @@ set tm=500
 syntax enable
 
 set t_Co=256
+set term=screen-256color
 
 " For GUI
 if has("gui_running")
@@ -155,6 +172,9 @@ if has("gui_running")
     set guioptions+=e
     set guitablabel=%M\ %t
 endif
+
+" Set C/C++ include path
+let &path.="src/include,/usr/include/AL,"
 
 " Set encoding to UTF-8
 set encoding=utf-8
@@ -226,18 +246,21 @@ endfunction
 " ====================================================
 " vim-colors-solarized  ==============================
 let g:solarized_termcolors=256
-set background=dark
-colorscheme solarized
+" set background=dark
+ colorscheme default
 
 " ====================================================
 " vim-airline ========================================
 
-let g:airline_theme='solarized'
+let g:airline_theme='jellybeans'
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#left_sep = ' '
 let g:airline#extensions#tabline#left_alt_sep = '|'
-let g:airline_section_b = '%{strftime("%c")}'
-let g:airlone_section_y = 'BN: %{bufnr("%")r'
+let g:airline_section_y = 'BN: %{bufnr("%")}r'
+let g:airline_powerline_fonts = 1
+let g:airline#extensions#tmuxline#enabled = 0
+
+let g:tmuxline_theme = 'jellybeans'
 
 " ====================================================
 " Emmet-vim ==========================================
@@ -345,20 +368,10 @@ if !exists('g:neocomplete#sources#omni#input_patterns')
   let g:neocomplete#sources#omni#input_patterns = {}
 endif
 "let g:neocomplete#sources#omni#input_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
-"let g:neocomplete#sources#omni#input_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
-"let g:neocomplete#sources#omni#input_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
+let g:neocomplete#sources#omni#input_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
+let g:neocomplete#sources#omni#input_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
 
 " ====================================================
 " vim-auto-save ======================================
 let g:auto_save_silent = 1
 
-" ====================================================
-" syntastic ==========================================
-set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
-set statusline+=%*
-
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 1
-let g:syntastic_check_on_open = 0
-let g:syntastic_check_on_wq = 0
