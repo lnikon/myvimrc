@@ -12,12 +12,13 @@ Plugin 'VundleVim/Vundle.vim'
 Plugin 'tpope/vim-pathogen'
 
 " VIM theming
-Plugin 'vim-airline/vim-airline'
-Plugin 'vim-airline/vim-airline-themes'
+Plugin 'itchyny/lightline.vim'
 Plugin 'altercation/vim-colors-solarized'
-Plugin 'edkolev/tmuxline.vim'
+" Plugin 'edkolev/tmuxline.vim'
 " Plugin 'chriskempson/base16-vim'
 " Plugin 'flazz/vim-colorschemes'
+" Plugin 'vim-airline/vim-airline'
+" Plugin 'vim-airline/vim-airline-themes'
 
 " Base plugins for work
 Plugin 'Raimondi/delimitMate'
@@ -26,7 +27,6 @@ Plugin 'jistr/vim-nerdtree-tabs'
 Plugin 'tomtom/tcomment_vim'
 Plugin 'vim-scripts/vim-auto-save'
 Plugin 'Townk/vim-autoclose'
-Plugin 'maralla/validator.vim'
 " Plugin 'gregsexton/MatchTag'
 " Plugin 'Valloric/YouCompleteMe'
 " Plugin 'vim-scripts/taglist.vim'
@@ -35,7 +35,7 @@ Plugin 'maralla/validator.vim'
 " C/C++ Development
 Plugin 'octol/vim-cpp-enhanced-highlight'
 Plugin 'Mizuchi/STL-Syntax'
-Plugin 'Shougo/neocomplete.vim'
+" Plugin 'Shougo/neocomplete.vim'
 " Plugin 'xolox/vim-misc'
 " Plugin 'vim-scripts/a.vim'
 " Plugin 'majutsushi/tagbar'
@@ -252,15 +252,15 @@ let g:solarized_termcolors=256
 " ====================================================
 " vim-airline ========================================
 
-let g:airline_theme='jellybeans'
-let g:airline#extensions#tabline#enabled = 1
-let g:airline#extensions#tabline#left_sep = ' '
-let g:airline#extensions#tabline#left_alt_sep = '|'
-let g:airline_section_y = 'BN: %{bufnr("%")}r'
-let g:airline_powerline_fonts = 1
-let g:airline#extensions#tmuxline#enabled = 0
-
-let g:tmuxline_theme = 'jellybeans'
+" let g:airline_theme='jellybeans'
+" let g:airline#extensions#tabline#enabled = 1
+" let g:airline#extensions#tabline#left_sep = ' '
+" let g:airline#extensions#tabline#left_alt_sep = '|'
+" let g:airline_section_y = 'BN: %{bufnr("%")}r'
+" let g:airline_powerline_fonts = 1
+" let g:airline#extensions#tmuxline#enabled = 0
+"
+" let g:tmuxline_theme = 'jellybeans'
 
 " ====================================================
 " Emmet-vim ==========================================
@@ -364,14 +364,73 @@ autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 
 " Enable heavy omni completion.
-if !exists('g:neocomplete#sources#omni#input_patterns')
-  let g:neocomplete#sources#omni#input_patterns = {}
-endif
-"let g:neocomplete#sources#omni#input_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
-let g:neocomplete#sources#omni#input_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
-let g:neocomplete#sources#omni#input_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
+" if !exists('g:neocomplete#sources#omni#input_patterns')
+"   let g:neocomplete#sources#omni#input_patterns = {}
+" endif
+" "let g:neocomplete#sources#omni#input_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
+" let g:neocomplete#sources#omni#input_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
+" let g:neocomplete#sources#omni#input_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
 
 " ====================================================
 " vim-auto-save ======================================
 let g:auto_save_silent = 1
 
+" LightLine
+let g:lightline = {
+      \ 'colorscheme': 'seoul256',
+      \ 'mode_map': { 'c': 'NORMAL' },
+      \ 'active': {
+      \   'left': [ [ 'mode', 'paste' ], [ 'fugitive', 'filename' ] ]
+      \ },
+      \ 'component_function': {
+      \   'modified': 'LightlineModified',
+      \   'readonly': 'LightlineReadonly',
+      \   'fugitive': 'LightlineFugitive',
+      \   'filename': 'LightlineFilename',
+      \   'fileformat': 'LightlineFileformat',
+      \   'filetype': 'LightlineFiletype',
+      \   'fileencoding': 'LightlineFileencoding',
+      \   'mode': 'LightlineMode',
+      \ }
+      \ }
+
+function! LightlineModified()
+  return &ft =~ 'help\|vimfiler\|gundo' ? '' : &modified ? '+' : &modifiable ? '' : '-'
+endfunction
+
+function! LightlineReadonly()
+  return &ft !~? 'help\|vimfiler\|gundo' && &readonly ? '⭤' : ''
+endfunction
+
+function! LightlineFilename()
+  return ('' != LightlineReadonly() ? LightlineReadonly() . ' ' : '') .
+        \ (&ft == 'vimfiler' ? vimfiler#get_status_string() :
+        \  &ft == 'unite' ? unite#get_status_string() :
+        \  &ft == 'vimshell' ? vimshell#get_status_string() :
+        \ '' != expand('%:t') ? expand('%:t') : '[No Name]') .
+        \ ('' != LightlineModified() ? ' ' . LightlineModified() : '')
+endfunction
+
+function! LightlineFugitive()
+  if &ft !~? 'vimfiler\|gundo' && exists("*fugitive#head")
+    let branch = fugitive#head()
+    return branch !=# '' ? '⭠ '.branch : ''
+  endif
+  return ''
+endfunction
+
+function! LightlineFileformat()
+  return winwidth(0) > 70 ? &fileformat : ''
+endfunction
+
+function! LightlineFiletype()
+  return winwidth(0) > 70 ? (&filetype !=# '' ? &filetype : 'no ft') : ''
+endfunction
+
+function! LightlineFileencoding()
+  return winwidth(0) > 70 ? (&fenc !=# '' ? &fenc : &enc) : ''
+endfunction
+
+function! LightlineMode()
+  return winwidth(0) > 60 ? lightline#mode() : ''
+endfunction
