@@ -14,6 +14,8 @@ Plugin 'tpope/vim-pathogen'
 " VIM theming
 Plugin 'itchyny/lightline.vim'
 Plugin 'altercation/vim-colors-solarized'
+Plugin 'Yggdroot/indentLine'
+Plugin 'morhetz/gruvbox'
 " Plugin 'edkolev/tmuxline.vim'
 " Plugin 'chriskempson/base16-vim'
 " Plugin 'flazz/vim-colorschemes'
@@ -27,6 +29,8 @@ Plugin 'jistr/vim-nerdtree-tabs'
 Plugin 'tomtom/tcomment_vim'
 Plugin 'vim-scripts/vim-auto-save'
 Plugin 'Townk/vim-autoclose'
+Plugin 'ajh17/vimcompletesme'
+Plugin 'Shougo/neocomplete.vim'
 " Plugin 'gregsexton/MatchTag'
 " Plugin 'Valloric/YouCompleteMe'
 " Plugin 'vim-scripts/taglist.vim'
@@ -242,12 +246,12 @@ function! <SID>BufcloseCloseIt()
         execute("bdelete! ".l:currentBufNum)
     endif
 endfunction
- 
+
 " ====================================================
 " vim-colors-solarized  ==============================
 let g:solarized_termcolors=256
-" set background=dark
- colorscheme default
+set background=dark
+colorscheme gruvbox
 
 " ====================================================
 " vim-airline ========================================
@@ -269,26 +273,26 @@ let g:solarized_termcolors=256
 
 " ====================================================
 " delimitMate ========================================
- 
+
 let delimitMate_expand_cr = 1
 au FileType mail let b:delimitMate_expand_cr = 1
 " ====================================================
 
 " ====================================================
 " start NerdTree on start-up and focus active window =
- "autocmd VimEnter * NERDTree
- "autocmd VimEnter * wincmd p
+"autocmd VimEnter * NERDTree
+"autocmd VimEnter * wincmd p
 " ====================================================
- 
+
 " ====================================================
 " NERDTreeTabs =======================================
- 
+
 map <leader>n <plug>NERDTreeTabsToggle<CR>
 " ====================================================
 
 " ====================================================
 " CPP syntax highlighting ============================
- 
+
 let g:cpp_class_scope_highlight = 1
 let g:cpp_experimental_template_highlight = 1
 " ====================================================
@@ -313,6 +317,149 @@ let g:neocomplete#enable_smart_case = 1
 " Set minimum syntax keyword length.
 let g:neocomplete#sources#syntax#min_keyword_length = 3
 let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
+
+" Define dictionary.
+let g:neocomplete#sources#dictionary#dictionaries = {
+            \ 'default' : '',
+            \ 'vimshell' : $HOME.'/.vimshell_hist',
+            \ 'scheme' : $HOME.'/.gosh_completions'
+            \ }
+
+" Define keyword.
+if !exists('g:neocomplete#keyword_patterns')
+    let g:neocomplete#keyword_patterns = {}
+endif
+let g:neocomplete#keyword_patterns['default'] = '\h\w*'
+
+" Plugin key-mappings.
+inoremap <expr><C-g>     neocomplete#undo_completion()
+inoremap <expr><C-l>     neocomplete#complete_common_string()
+
+" Recommended key-mappings.
+" <CR>: close popup and save indent.
+inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
+function! s:my_cr_function()
+    return (pumvisible() ? "\<C-y>" : "" ) . "\<CR>"
+    " For no inserting <CR> key.
+    "return pumvisible() ? "\<C-y>" : "\<CR>"
+endfunction
+" <TAB>: completion.
+inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
+" <C-h>, <BS>: close popup and delete backword char.
+inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
+inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
+" Close popup by <Space>.
+"inoremap <expr><Space> pumvisible() ? "\<C-y>" : "\<Space>"
+
+" AutoComplPop like behavior.
+"let g:neocomplete#enable_auto_select = 1
+
+" Shell like behavior(not recommended).
+"set completeopt+=longest
+"let g:neocomplete#enable_auto_select = 1
+"let g:neocomplete#disable_auto_complete = 1
+"inoremap <expr><TAB>  pumvisible() ? "\<Down>" : "\<C-x>\<C-u>"
+
+" Enable omni completion.
+autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
+
+" Enable heavy omni completion.
+" if !exists('g:neocomplete#sources#omni#input_patterns')
+"   let g:neocomplete#sources#omni#input_patterns = {}
+" endif
+" "let g:neocomplete#sources#omni#input_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
+" let g:neocomplete#sources#omni#input_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
+" let g:neocomplete#sources#omni#input_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
+
+" ====================================================
+" vim-auto-save ======================================
+let g:auto_save_silent = 1
+
+" LightLine
+let g:lightline = {
+            \ 'colorscheme': 'seoul256',
+            \ 'mode_map': { 'c': 'NORMAL' },
+            \ 'active': {
+            \   'left': [ [ 'mode', 'paste' ], [ 'fugitive', 'filename' ] ]
+            \ },
+            \ 'component_function': {
+            \   'modified': 'LightlineModified',
+            \   'readonly': 'LightlineReadonly',
+            \   'fugitive': 'LightlineFugitive',
+            \   'filename': 'LightlineFilename',
+            \   'fileformat': 'LightlineFileformat',
+            \   'filetype': 'LightlineFiletype',
+            \   'fileencoding': 'LightlineFileencoding',
+            \   'mode': 'LightlineMode',
+            \ }
+            \ }
+
+function! LightlineModified()
+    return &ft =~ 'help\|vimfiler\|gundo' ? '' : &modified ? '+' : &modifiable ? '' : '-'
+endfunction
+
+function! LightlineReadonly()
+    return &ft !~? 'help\|vimfiler\|gundo' && &readonly ? '⭤' : ''
+endfunction
+
+function! LightlineFilename()
+    return ('' != LightlineReadonly() ? LightlineReadonly() . ' ' : '') .
+                \ (&ft == 'vimfiler' ? vimfiler#get_status_string() :
+                \  &ft == 'unite' ? unite#get_status_string() :
+                \  &ft == 'vimshell' ? vimshell#get_status_string() :
+                \ '' != expand('%:t') ? expand('%:t') : '[No Name]') .
+                \ ('' != LightlineModified() ? ' ' . LightlineModified() : '')
+endfunction
+
+function! LightlineFugitive()
+    if &ft !~? 'vimfiler\|gundo' && exists("*fugitive#head")
+        let branch = fugitive#head()
+        return branch !=# '' ? '⭠ '.branch : ''
+    endif
+    return ''
+endfunction
+
+function! LightlineFileformat()
+    return winwidth(0) > 70 ? &fileformat : ''
+endfunction
+
+function! LightlineFiletype()
+    return winwidth(0) > 70 ? (&filetype !=# '' ? &filetype : 'no ft') : ''
+endfunction
+
+function! LightlineFileencoding()
+    return winwidth(0) > 70 ? (&fenc !=# '' ? &fenc : &enc) : ''
+endfunction
+
+function! LightlineMode()
+    return winwidth(0) > 60 ? lightline#mode() : ''
+endfunction
+
+" IndentLine
+set list lcs=tab:\|\
+let g:indentLine_color_term = 239
+let g:indentLine_color_gui = '#DADADA'
+let g:indentLine_char = '┆'
+"let g:indentLine_char = '∙▹¦'
+"let g:indentLine_char = '∙'
+
+" vimcompletesme
+autocmd FileType cpp let b:vcm_tab_complete = "tags"
+
+" neocomplete
+"Note: This option must be set in .vimrc(_vimrc).  NOT IN .gvimrc(_gvimrc)!
+" Disable AutoComplPop.
+let g:acp_enableAtStartup = 0
+" Use neocomplete.
+let g:neocomplete#enable_at_startup = 1
+" Use smartcase.
+let g:neocomplete#enable_smart_case = 1
+" Set minimum syntax keyword length.
+let g:neocomplete#sources#syntax#min_keyword_length = 3
 
 " Define dictionary.
 let g:neocomplete#sources#dictionary#dictionaries = {
@@ -364,73 +511,13 @@ autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
 autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 
 " Enable heavy omni completion.
-" if !exists('g:neocomplete#sources#omni#input_patterns')
-"   let g:neocomplete#sources#omni#input_patterns = {}
-" endif
-" "let g:neocomplete#sources#omni#input_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
-" let g:neocomplete#sources#omni#input_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
-" let g:neocomplete#sources#omni#input_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
+if !exists('g:neocomplete#sources#omni#input_patterns')
+  let g:neocomplete#sources#omni#input_patterns = {}
+endif
+"let g:neocomplete#sources#omni#input_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
+"let g:neocomplete#sources#omni#input_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
+"let g:neocomplete#sources#omni#input_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
 
-" ====================================================
-" vim-auto-save ======================================
-let g:auto_save_silent = 1
-
-" LightLine
-let g:lightline = {
-      \ 'colorscheme': 'seoul256',
-      \ 'mode_map': { 'c': 'NORMAL' },
-      \ 'active': {
-      \   'left': [ [ 'mode', 'paste' ], [ 'fugitive', 'filename' ] ]
-      \ },
-      \ 'component_function': {
-      \   'modified': 'LightlineModified',
-      \   'readonly': 'LightlineReadonly',
-      \   'fugitive': 'LightlineFugitive',
-      \   'filename': 'LightlineFilename',
-      \   'fileformat': 'LightlineFileformat',
-      \   'filetype': 'LightlineFiletype',
-      \   'fileencoding': 'LightlineFileencoding',
-      \   'mode': 'LightlineMode',
-      \ }
-      \ }
-
-function! LightlineModified()
-  return &ft =~ 'help\|vimfiler\|gundo' ? '' : &modified ? '+' : &modifiable ? '' : '-'
-endfunction
-
-function! LightlineReadonly()
-  return &ft !~? 'help\|vimfiler\|gundo' && &readonly ? '⭤' : ''
-endfunction
-
-function! LightlineFilename()
-  return ('' != LightlineReadonly() ? LightlineReadonly() . ' ' : '') .
-        \ (&ft == 'vimfiler' ? vimfiler#get_status_string() :
-        \  &ft == 'unite' ? unite#get_status_string() :
-        \  &ft == 'vimshell' ? vimshell#get_status_string() :
-        \ '' != expand('%:t') ? expand('%:t') : '[No Name]') .
-        \ ('' != LightlineModified() ? ' ' . LightlineModified() : '')
-endfunction
-
-function! LightlineFugitive()
-  if &ft !~? 'vimfiler\|gundo' && exists("*fugitive#head")
-    let branch = fugitive#head()
-    return branch !=# '' ? '⭠ '.branch : ''
-  endif
-  return ''
-endfunction
-
-function! LightlineFileformat()
-  return winwidth(0) > 70 ? &fileformat : ''
-endfunction
-
-function! LightlineFiletype()
-  return winwidth(0) > 70 ? (&filetype !=# '' ? &filetype : 'no ft') : ''
-endfunction
-
-function! LightlineFileencoding()
-  return winwidth(0) > 70 ? (&fenc !=# '' ? &fenc : &enc) : ''
-endfunction
-
-function! LightlineMode()
-  return winwidth(0) > 60 ? lightline#mode() : ''
-endfunction
+" For perlomni.vim setting.
+" https://github.com/c9s/perlomni.vim
+let g:neocomplete#sources#omni#input_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
