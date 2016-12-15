@@ -29,7 +29,6 @@ Plugin 'jistr/vim-nerdtree-tabs'
 Plugin 'tomtom/tcomment_vim'
 Plugin 'vim-scripts/vim-auto-save'
 Plugin 'Townk/vim-autoclose'
-Plugin 'ajh17/vimcompletesme'
 Plugin 'Shougo/neocomplete.vim'
 " Plugin 'gregsexton/MatchTag'
 " Plugin 'Valloric/YouCompleteMe'
@@ -144,7 +143,7 @@ set incsearch
 set lazyredraw
 
 " Cursorline
-" set cursorline
+set cursorline
 set colorcolumn=110
 highlight ColorColumn ctermbg=darkgrey
 
@@ -381,7 +380,7 @@ let g:auto_save_silent = 1
 
 " LightLine
 let g:lightline = {
-            \ 'colorscheme': 'seoul256',
+            \ 'colorscheme': 'Tomorrow_Night',
             \ 'mode_map': { 'c': 'NORMAL' },
             \ 'active': {
             \   'left': [ [ 'mode', 'paste' ], [ 'fugitive', 'filename' ] ]
